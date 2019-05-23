@@ -19,12 +19,23 @@ bind!(st::SQLite.Stmt, vals::Vector) = foreach((n)->SQLite.bind!(st, n, vals[n])
 
 function exebind!(st::SQLite.Stmt, vals::Vector, cols::Vector)
 	bind!(st, vals, cols)
-	SQLite.execute!(st)
+	execute_st(st, vals)
 end
 
 function exebind!(st::SQLite.Stmt, vals::Vector)
 	bind!(st, vals)
-	SQLite.execute!(st)
+	execute_st(st, vals)
+end
+
+function execute_st(st, vals)
+	try
+		SQLite.execute!(st)
+		return true
+	catch s
+		println(STDERR, "ERR: ", s)
+		println(STDERR, "ST: ", vals)
+	end
+	return false
 end
 
 truncate!(db, table::String) = SQLite.query(db, "DELETE FROM $table")
